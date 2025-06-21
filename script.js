@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedSlot: 'head',
         currentPage: 0,
         searchTerm: '',
+        orbCounts: { annul: 0, annex: 0, turmoil: 0, falter: 0 },
     };
 
     // --- DOM Element Cache ---
@@ -36,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         detailsItemName: document.getElementById('details-item-name'),
         detailsItemIcon: document.getElementById('details-item-icon'),
         orbsContainer: document.getElementById('orbs-container'),
+        orbCounts: document.getElementById('orb-counts'),
         enchantmentsTitle: document.getElementById('enchantments-title'),
         enchantmentList: document.getElementById('enchantment-list'),
     };
@@ -107,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.selectedItem = allItems.find(item => item.id === itemId) || null;
             state.activeEnchantments = [];
             state.detailsViewMode = 'current';
+            state.orbCounts = { annul: 0, annex: 0, turmoil: 0, falter: 0 };
             
             // Visually mark selected item
             document.querySelectorAll('.item.selected').forEach(el => el.classList.remove('selected'));
@@ -215,10 +218,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function renderOrbCounters() {
+        if (!state.selectedItem) {
+            dom.orbCounts.parentElement.classList.add('hidden');
+            return;
+        }
+        dom.orbCounts.parentElement.classList.remove('hidden');
+
+        dom.orbCounts.innerHTML = `
+            <div class="orb-count">
+                <div class="orb-count-label">Annulment</div>
+                <div class="orb-count-value">${state.orbCounts.annul}</div>
+            </div>
+            <div class="orb-count">
+                <div class="orb-count-label">Annexing</div>
+                <div class="orb-count-value">${state.orbCounts.annex}</div>
+            </div>
+            <div class="orb-count">
+                <div class="orb-count-label">Turmoil</div>
+                <div class="orb-count-value">${state.orbCounts.turmoil}</div>
+            </div>
+            <div class="orb-count">
+                <div class="orb-count-label">Faltering</div>
+                <div class="orb-count-value">${state.orbCounts.falter}</div>
+            </div>
+        `;
+    }
+
     function renderDetailsPanel() {
         if (!state.selectedItem) {
             dom.detailsPlaceholder.classList.remove('hidden');
             dom.detailsContent.classList.add('hidden');
+            renderOrbCounters();
             return;
         }
 
@@ -228,6 +259,8 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.detailsItemName.textContent = state.selectedItem.name;
         dom.detailsItemIcon.src = `${API_BASE_URL}${state.selectedItem.id}.png`;
         dom.detailsItemIcon.alt = state.selectedItem.name;
+
+        renderOrbCounters();
 
         const itemSlotKey = Object.keys(SLOT_MAP).find(key => SLOT_MAP[key] === state.selectedItem.equipment.slot);
         
@@ -276,6 +309,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const itemSlotKey = Object.keys(SLOT_MAP).find(key => SLOT_MAP[key] === state.selectedItem.equipment.slot);
         if (!itemSlotKey) return;
+
+        // --- Store previous state for comparison
+        const previousEnchantmentCount = state.activeEnchantments.length;
+        const previousEnchantments = JSON.stringify(state.activeEnchantments);
 
         // Helper function to get a random enchantment tier from a specific family (by baseName)
         const getRandomTier = (baseName) => {
@@ -333,9 +370,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 break;
         }
+
+        // --- Check if a change occurred and increment counter
+        const hasChanged = previousEnchantmentCount !== state.activeEnchantments.length ||
+                           previousEnchantments !== JSON.stringify(state.activeEnchantments);
+
+        if (hasChanged) {
+            state.orbCounts[orbId]++;
+            renderOrbCounters();
+        }
+
         renderDetailsPanel();
     }
 
     // --- Startup ---
     init();
 }); 
+
