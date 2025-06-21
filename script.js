@@ -9,6 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const ITEMS_PER_PAGE = 50;
 
+    const ORBS = [
+        { id: 'annul', name: 'Orb of Annulment', icon: 'https://oldschool.runescape.wiki/images/Binding_necklace.png?4338d' },
+        { id: 'annex', name: 'Orb of Annexing', icon: 'https://oldschool.runescape.wiki/images/Binding_necklace.png?4338d' },
+        { id: 'turmoil', name: 'Orb of Turmoil', icon: 'https://oldschool.runescape.wiki/images/Binding_necklace.png?4338d' },
+        { id: 'falter', name: 'Orb of Faltering', icon: 'https://oldschool.runescape.wiki/images/Binding_necklace.png?4338d' }
+    ];
+
     let allItems = [];
     let allEnchantments = [];
     
@@ -77,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.searchBar.addEventListener('input', handleSearch);
         dom.prevPageButton.addEventListener('click', () => changePage(-1));
         dom.nextPageButton.addEventListener('click', () => changePage(1));
-        dom.itemList.addEventListener('click', handleItemSelection);
+        dom.itemGrid.addEventListener('click', handleItemSelection);
         dom.enchantmentsTitle.addEventListener('click', toggleEnchantmentView);
         dom.orbsContainer.addEventListener('click', handleOrbApplication);
     }
@@ -114,12 +121,14 @@ document.addEventListener('DOMContentLoaded', () => {
             itemElement.classList.add('selected');
 
             renderDetailsPanel();
+            renderOrbs();
         }
     }
     
     function handleOrbApplication(e) {
-        if (e.target.matches('.orb-button')) {
-            applyOrb(e.target.dataset.orbId);
+        const target = e.target.closest('.orb-button');
+        if (target) {
+            applyOrb(target.dataset.orbId);
         }
     }
 
