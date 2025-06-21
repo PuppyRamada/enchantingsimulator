@@ -9,13 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const ITEMS_PER_PAGE = 50;
 
-    const ORBS = [
-        { id: 'annul', name: 'Orb of Annulment', icon: 'https://oldschool.runescape.wiki/images/Binding_necklace.png?4338d' },
-        { id: 'annex', name: 'Orb of Annexing', icon: 'https://oldschool.runescape.wiki/images/Binding_necklace.png?4338d' },
-        { id: 'turmoil', name: 'Orb of Turmoil', icon: 'https://oldschool.runescape.wiki/images/Binding_necklace.png?4338d' },
-        { id: 'falter', name: 'Orb of Faltering', icon: 'https://oldschool.runescape.wiki/images/Binding_necklace.png?4338d' }
-    ];
-
     let allItems = [];
     let allEnchantments = [];
     
@@ -26,17 +19,17 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedSlot: 'head',
         currentPage: 0,
         searchTerm: '',
-        orbCounts: { annul: 0, annex: 0, turmoil: 0, falter: 0 },
     };
 
     // --- DOM Element Cache ---
     const dom = {
-        loader: document.getElementById('loader'),
-        mainContent: document.getElementById('main-content'),
-        slotButtonsContainer: document.getElementById('slot-buttons-container'),
-        itemGrid: document.getElementById('item-grid'),
-        paginationContainer: document.getElementById('pagination-container'),
+        slotButtonsContainer: document.getElementById('slot-buttons'),
+        itemListHeader: document.getElementById('item-list-header'),
+        itemList: document.getElementById('item-list'),
         searchBar: document.getElementById('search-bar'),
+        prevPageButton: document.getElementById('prev-page'),
+        nextPageButton: document.getElementById('next-page'),
+        pageIndicator: document.getElementById('page-indicator'),
         detailsPanel: document.getElementById('details-panel'),
         detailsPlaceholder: document.getElementById('details-placeholder'),
         detailsContent: document.getElementById('details-content'),
@@ -84,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.searchBar.addEventListener('input', handleSearch);
         dom.prevPageButton.addEventListener('click', () => changePage(-1));
         dom.nextPageButton.addEventListener('click', () => changePage(1));
-        dom.itemGrid.addEventListener('click', handleItemSelection);
+        dom.itemList.addEventListener('click', handleItemSelection);
         dom.enchantmentsTitle.addEventListener('click', toggleEnchantmentView);
         dom.orbsContainer.addEventListener('click', handleOrbApplication);
     }
@@ -114,21 +107,18 @@ document.addEventListener('DOMContentLoaded', () => {
             state.selectedItem = allItems.find(item => item.id === itemId) || null;
             state.activeEnchantments = [];
             state.detailsViewMode = 'current';
-            state.orbCounts = { annul: 0, annex: 0, turmoil: 0, falter: 0 };
             
             // Visually mark selected item
             document.querySelectorAll('.item.selected').forEach(el => el.classList.remove('selected'));
             itemElement.classList.add('selected');
 
             renderDetailsPanel();
-            renderOrbs();
         }
     }
     
     function handleOrbApplication(e) {
-        const target = e.target.closest('.orb-button');
-        if (target) {
-            applyOrb(target.dataset.orbId);
+        if (e.target.matches('.orb-button')) {
+            applyOrb(e.target.dataset.orbId);
         }
     }
 
@@ -210,43 +200,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderOrbs() {
         dom.orbsContainer.innerHTML = '';
-        if (!state.selectedItem) return;
-
-        ORBS.forEach(orb => {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'orb-button-wrapper';
-
+        const orbs = [
+            { name: 'Annulment', id: 'annul' },
+            { name: 'Annexing', id: 'annex' },
+            { name: 'Turmoil', id: 'turmoil' },
+            { name: 'Faltering', id: 'falter' },
+        ];
+        orbs.forEach(orb => {
             const button = document.createElement('button');
-            button.id = `${orb.id}-orb`;
-            button.className = 'orb-button';
+            button.textContent = orb.name;
             button.dataset.orbId = orb.id;
-            button.title = orb.name;
-            
-            const img = document.createElement('img');
-            img.src = orb.icon;
-            img.alt = orb.name;
-            button.appendChild(img);
-
-            const count = document.createElement('div');
-            count.className = 'orb-count-value';
-            count.id = `${orb.id}-orb-count`;
-            count.textContent = state.orbCounts[orb.id] || 0;
-
-            wrapper.appendChild(button);
-            wrapper.appendChild(count);
-            dom.orbsContainer.appendChild(wrapper);
+            button.className = 'orb-button';
+            dom.orbsContainer.appendChild(button);
         });
-    }
-
-    function renderOrbCounters() {
-        if (!state.selectedItem) return;
-
-        for (const orbId in state.orbCounts) {
-            const countElement = document.getElementById(`${orbId}-orb-count`);
-            if (countElement) {
-                countElement.textContent = state.orbCounts[orbId];
-            }
-        }
     }
 
     function renderDetailsPanel() {
@@ -262,8 +228,6 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.detailsItemName.textContent = state.selectedItem.name;
         dom.detailsItemIcon.src = `${API_BASE_URL}${state.selectedItem.id}.png`;
         dom.detailsItemIcon.alt = state.selectedItem.name;
-
-        renderOrbCounters();
 
         const itemSlotKey = Object.keys(SLOT_MAP).find(key => SLOT_MAP[key] === state.selectedItem.equipment.slot);
         
@@ -312,10 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const itemSlotKey = Object.keys(SLOT_MAP).find(key => SLOT_MAP[key] === state.selectedItem.equipment.slot);
         if (!itemSlotKey) return;
-
-        // --- Store previous state for comparison
-        const previousEnchantmentCount = state.activeEnchantments.length;
-        const previousEnchantments = JSON.stringify(state.activeEnchantments);
 
         // Helper function to get a random enchantment tier from a specific family (by baseName)
         const getRandomTier = (baseName) => {
@@ -373,20 +333,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 break;
         }
-
-        // --- Check if a change occurred and increment counter
-        const hasChanged = previousEnchantmentCount !== state.activeEnchantments.length ||
-                           previousEnchantments !== JSON.stringify(state.activeEnchantments);
-
-        if (hasChanged) {
-            state.orbCounts[orbId]++;
-            renderOrbCounters();
-        }
-
         renderDetailsPanel();
     }
 
     // --- Startup ---
     init();
 }); 
-
