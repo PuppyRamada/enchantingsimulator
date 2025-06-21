@@ -55,6 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
             allItems = Object.values(await itemsResponse.json());
             allEnchantments = await enchantmentsResponse.json();
 
+            // Pre-process enchantments to add a baseName for family-checking
+            allEnchantments.forEach(ench => {
+                ench.baseName = ench.name.replace(/ (I|II|III|IV|V)$/, '').trim();
+            });
+
             setupEventListeners();
             renderAll();
         } catch (error) {
@@ -229,12 +234,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let enchantmentsToDisplay = [];
         if (state.detailsViewMode === 'all') {
             dom.enchantmentsTitle.textContent = `Available Enchantments (Click to show current)`;
-            // To show all, we group by name and show the highest tier available for the slot
+            // To show all, we group by baseName and show the highest tier available for the slot
             const groupedEnchants = allEnchantments
                 .filter(e => e.slots.includes(itemSlotKey))
                 .reduce((acc, ench) => {
-                    if (!acc[ench.name] || acc[ench.name].tier < ench.tier) {
-                        acc[ench.name] = ench;
+                    if (!acc[ench.baseName] || acc[ench.baseName].tier < ench.tier) {
+                        acc[ench.baseName] = ench;
                     }
                     return acc;
                 }, {});
@@ -251,13 +256,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const fragment = document.createDocumentFragment();
             enchantmentsToDisplay.forEach(ench => {
                 const li = document.createElement('li');
-                // The name from JSON might already contain a tier (e.g., "Fire Damage I")
-                // We remove it before adding the correct tier number to avoid duplication.
-                const baseName = ench.name.replace(/ (I|II|III|IV|V)$/, '');
                 const tierDisplay = romanNumerals[ench.tier] || '';
                 
                 li.innerHTML = `
-                    <div class="enchant-name">${baseName}${tierDisplay}</div>
+                    <div class="enchant-name">${ench.baseName}${tierDisplay}</div>
                     <div class="enchant-desc">${ench.description}</div>
                 `;
                 fragment.appendChild(li);
@@ -275,9 +277,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const itemSlotKey = Object.keys(SLOT_MAP).find(key => SLOT_MAP[key] === state.selectedItem.equipment.slot);
         if (!itemSlotKey) return;
 
-        // Helper function to get a random enchantment from a specific family
-        const getRandomTier = (name) => {
-            const family = allEnchantments.filter(e => e.name === name && e.slots.includes(itemSlotKey));
+        // Helper function to get a random enchantment tier from a specific family (by baseName)
+        const getRandomTier = (baseName) => {
+            const family = allEnchantments.filter(e => e.baseName === baseName && e.slots.includes(itemSlotKey));
             return family.length > 0 ? family[Math.floor(Math.random() * family.length)] : null;
         };
 
@@ -291,15 +293,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             case 'annex': // Add a new random enchantment (of a random tier)
                 if (state.activeEnchantments.length < 3) {
-                    const currentEnchantNames = state.activeEnchantments.map(e => e.name);
-                    const possibleNames = [...new Set(allEnchantments
-                        .filter(e => e.slots.includes(itemSlotKey) && !currentEnchantNames.includes(e.name))
-                        .map(e => e.name)
+                    const currentEnchantBaseNames = state.activeEnchantments.map(e => e.baseName);
+                    
+                    const possibleBaseNames = [...new Set(allEnchantments
+                        .filter(e => e.slots.includes(itemSlotKey) && !currentEnchantBaseNames.includes(e.baseName))
+                        .map(e => e.baseName)
                     )];
 
-                    if (possibleNames.length > 0) {
-                        const randomName = possibleNames[Math.floor(Math.random() * possibleNames.length)];
-                        const newEnchantment = getRandomTier(randomName);
+                    if (possibleBaseNames.length > 0) {
+                        const randomBaseName = possibleBaseNames[Math.floor(Math.random() * possibleBaseNames.length)];
+                        const newEnchantment = getRandomTier(randomBaseName);
                         if (newEnchantment) {
                             state.activeEnchantments.push(newEnchantment);
                         }
@@ -307,17 +310,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 break;
 
-            case 'turmoil': // Reroll all enchantments
+            case 'turmoil': // Reroll all enchantments with new unique families
                 state.activeEnchantments = [];
-                const availableNames = [...new Set(allEnchantments
+                const availableBaseNames = [...new Set(allEnchantments
                     .filter(e => e.slots.includes(itemSlotKey))
-                    .map(e => e.name)
+                    .map(e => e.baseName)
                 )];
                 
-                for (let i = 0; i < 3 && availableNames.length > 0; i++) {
-                    const nameIndex = Math.floor(Math.random() * availableNames.length);
-                    const name = availableNames.splice(nameIndex, 1)[0];
-                    const newEnchantment = getRandomTier(name);
+                for (let i = 0; i < 3 && availableBaseNames.length > 0; i++) {
+                    const nameIndex = Math.floor(Math.random() * availableBaseNames.length);
+                    const baseName = availableBaseNames.splice(nameIndex, 1)[0];
+                    const newEnchantment = getRandomTier(baseName);
                     if (newEnchantment) {
                         state.activeEnchantments.push(newEnchantment);
                     }
@@ -326,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             case 'falter': // Reroll tiers of existing enchantments
                 state.activeEnchantments = state.activeEnchantments.map(activeEnch => {
-                    return getRandomTier(activeEnch.name) || activeEnch;
+                    return getRandomTier(activeEnch.baseName) || activeEnch;
                 });
                 break;
         }
