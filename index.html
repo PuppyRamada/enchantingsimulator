@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSRS Enchantment Simulator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>OSRS Enchantment Simulator</h1>
+        </header>
+
+        <main class="main-content">
+            <div class="selection-panel">
+                <h2>1. Select an Item</h2>
+                <div id="slot-buttons" class="slot-buttons"></div>
+                <div class="search-container">
+                    <input type="text" id="search-bar" placeholder="Search for an item...">
+                </div>
+                <div id="item-list-header" class="item-list-header">Items</div>
+                <div id="item-list" class="item-list">
+                    <!-- Items will be dynamically loaded here -->
+                </div>
+                <div class="pagination">
+                    <button id="prev-page" class="page-button">Previous</button>
+                    <span id="page-indicator">Page 1</span>
+                    <button id="next-page" class="page-button">Next</button>
+                </div>
+            </div>
+
+            <div id="details-panel" class="details-panel">
+                <div id="details-placeholder">
+                    <p>Select an item to see its details and apply enchantments.</p>
+                </div>
+                <div id="details-content" class="hidden">
+                    <div class="details-header">
+                        <img id="details-item-icon" src="" alt="Selected item icon">
+                        <h2 id="details-item-name"></h2>
+                    </div>
+
+                    <div class="enchantment-section">
+                        <h3>2. Apply Orbs</h3>
+                        <div id="orbs-container" class="orbs-container">
+                            <!-- Orb buttons will be dynamically loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div class="enchantment-section">
+                        <h3 id="enchantments-title" class="clickable" title="Click to toggle view">Current Enchantments</h3>
+                        <ul id="enchantment-list" class="enchantment-list">
+                            <!-- Enchantments will be dynamically loaded here -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js?v=1.1"></script>
+</body>
+</html> 

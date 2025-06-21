@@ -1,0 +1,1001 @@
+[
+  {
+    "name": "Protection",
+    "description": "2% Chance to reduce damage by 5%",
+    "weight": 10,
+    "block_type": "NONE",
+    "effect_type": "PROTECTION",
+    "tier": 1,
+    "slots": ["BODY", "HEAD", "LEGS"]
+  },
+  {
+    "name": "Critical Strike",
+    "description": "5% chance to hit a critical hit",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "CRITICAL_STRIKE",
+    "tier": 1,
+    "slots": ["HEAD"]
+  },
+  {
+    "name": "Critical Strike",
+    "description": "7% chance to hit a critical hit",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "CRITICAL_STRIKE",
+    "tier": 2,
+    "slots": ["HEAD"]
+  },
+  {
+    "name": "Critical Strike",
+    "description": "10% chance to hit a critical hit",
+    "weight": 5,
+    "block_type": "NONE",
+    "effect_type": "CRITICAL_STRIKE",
+    "tier": 3,
+    "slots": ["HEAD"]
+  },
+  {
+    "name": "Venomous",
+    "description": "Chance to cure yourself of poison/venom & chance to envenom your opponent",
+    "weight": 25,
+    "block_type": "NONE",
+    "effect_type": "VENOMOUS",
+    "tier": 1,
+    "slots": ["HEAD"]
+  },
+  {
+    "name": "Increased Luck",
+    "description": "Increases your chances of getting a rare drop by 1%",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "INCREASED_LUCK",
+    "tier": 1,
+    "slots": ["HEAD"]
+  },
+  {
+    "name": "Increased Luck",
+    "description": "Increases your chances of getting a rare drop by 2%",
+    "weight": 20,
+    "block_type": "NONE",
+    "effect_type": "INCREASED_LUCK",
+    "tier": 2,
+    "slots": ["HEAD"]
+  },
+  {
+    "name": "Increased Luck",
+    "description": "Increases your chances of getting a rare drop by 3%",
+    "weight": 5,
+    "block_type": "NONE",
+    "effect_type": "INCREASED_LUCK",
+    "tier": 3,
+    "slots": ["HEAD"]
+  },
+  {
+    "name": "Saradomin's Grace",
+    "description": "2% chance to insta-kill at under 150 hp, but drain 5 prayer points",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "NERFS",
+    "tier": 1,
+    "slots": ["BODY"]
+  },
+  {
+    "name": "Zamorak's Curse",
+    "description": "2% chance to deal 1.5x damage, but will also suffer 5 damage",
+    "weight": 20,
+    "block_type": "NONE",
+    "effect_type": "NERFS",
+    "tier": 1,
+    "slots": ["BODY"]
+  },
+  {
+    "name": "Guthix's Balance",
+    "description": "2% chance to heal you and your opponent for 10 damage",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "NERFS",
+    "tier": 1,
+    "slots": ["BODY"]
+  },
+  {
+    "name": "Spell Suppressor",
+    "description": "1% chance to reduce incoming spell damage",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "BLOCK_DAMAGE",
+    "tier": 1,
+    "slots": ["LEGS"]
+  },
+  {
+    "name": "Spell Suppressor",
+    "description": "2% chance to reduce incoming spell damage",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "BLOCK_DAMAGE",
+    "tier": 2,
+    "slots": ["LEGS"]
+  },
+  {
+    "name": "Spell Suppressor",
+    "description": "3% chance to reduce incoming spell damage",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "BLOCK_DAMAGE",
+    "tier": 3,
+    "slots": ["LEGS"]
+  },
+  {
+    "name": "Range Suppressor",
+    "description": "1% chance to reduce incoming range damage",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "BLOCK_DAMAGE",
+    "tier": 1,
+    "slots": ["LEGS"]
+  },
+  {
+    "name": "Range Suppressor",
+    "description": "2% chance to reduce incoming range damage",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "BLOCK_DAMAGE",
+    "tier": 2,
+    "slots": ["LEGS"]
+  },
+  {
+    "name": "Range Suppressor",
+    "description": "3% chance to reduce incoming range damage",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "BLOCK_DAMAGE",
+    "tier": 3,
+    "slots": ["LEGS"]
+  },
+  {
+    "name": "Sword Suppressor",
+    "description": "1% chance to reduce incoming melee damage",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "BLOCK_DAMAGE",
+    "tier": 1,
+    "slots": ["LEGS"]
+  },
+  {
+    "name": "Sword Suppressor",
+    "description": "2% chance to reduce incoming melee damage",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "BLOCK_DAMAGE",
+    "tier": 2,
+    "slots": ["LEGS"]
+  },
+  {
+    "name": "Sword Suppressor",
+    "description": "3% chance to reduce incoming melee damage",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "BLOCK_DAMAGE",
+    "tier": 3,
+    "slots": ["LEGS"]
+  },
+  {
+    "name": "Featherweight",
+    "description": "Reduces energy drain by 25%",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "FEATHERWEIGHT",
+    "tier": 1,
+    "slots": ["FEET"]
+  },
+  {
+    "name": "Stand Your Ground",
+    "description": "Staying put increases your damage by 1% for maximum of 5%",
+    "weight": 10,
+    "block_type": "NONE",
+    "effect_type": "STAND_YOUR_GROUND",
+    "tier": 1,
+    "slots": ["FEET"]
+  },
+  {
+    "name": "Critical Damage",
+    "description": "Critical hits buffed to 20% more damage",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "CRITICAL_STRIKE_DAMAGE",
+    "tier": 1,
+    "slots": ["HANDS"]
+  },
+  {
+    "name": "Critical Damage",
+    "description": "Critical hits buffed to 25% more damage",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "CRITICAL_STRIKE_DAMAGE",
+    "tier": 2,
+    "slots": ["HANDS"]
+  },
+  {
+    "name": "Critical Damage",
+    "description": "Critical hits buffed to 30% more damage",
+    "weight": 5,
+    "block_type": "NONE",
+    "effect_type": "CRITICAL_STRIKE_DAMAGE",
+    "tier": 3,
+    "slots": ["HANDS"]
+  },
+  {
+    "name": "Fire Bender",
+    "description": "1% chance to throw a fireball at your enemy",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "BENDER",
+    "tier": 1,
+    "slots": ["HANDS"]
+  },
+  {
+    "name": "Fire Bender",
+    "description": "2% chance to throw a fireball at your enemy",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "BENDER",
+    "tier": 2,
+    "slots": ["HANDS"]
+  },
+  {
+    "name": "Fire Bender",
+    "description": "3% chance to throw a fireball at your enemy",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "BENDER",
+    "tier": 3,
+    "slots": ["HANDS"]
+  },
+  {
+    "name": "Water Bender I",
+    "description": "1% chance to drown your enemy in water",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "BENDER",
+    "tier": 1,
+    "slots": ["HANDS"]
+  },
+  {
+    "name": "Water Bender II",
+    "description": "2% chance to drown your enemy in water",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "BENDER",
+    "tier": 2,
+    "slots": ["HANDS"]
+  },
+  {
+    "name": "Water Bender III",
+    "description": "3% chance to drown your enemy in water",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "BENDER",
+    "tier": 3,
+    "slots": ["HANDS"]
+  },
+  {
+    "name": "Earth Bender",
+    "description": "1% chance to stun your opponent for 2 seconds",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "BENDER",
+    "tier": 1,
+    "slots": ["HANDS"]
+  },
+  {
+    "name": "Earth Bender",
+    "description": "2% chance to stun your opponent for 2 seconds",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "BENDER",
+    "tier": 2,
+    "slots": ["HANDS"]
+  },
+  {
+    "name": "Earth Bender",
+    "description": "3% chance to stun your opponent for 2 seconds",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "BENDER",
+    "tier": 3,
+    "slots": ["HANDS"]
+  },
+  {
+    "name": "Air Bender I",
+    "description": "1% chance to throw a fireball at your enemy",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "BENDER",
+    "tier": 1,
+    "slots": ["HANDS"]
+  },
+  {
+    "name": "Air Bender II",
+    "description": "2% chance to throw a fireball at your enemy",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "BENDER",
+    "tier": 2,
+    "slots": ["HANDS"]
+  },
+  {
+    "name": "Air Bender III",
+    "description": "3% chance to throw a fireball at your enemy",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "BENDER",
+    "tier": 3,
+    "slots": ["HANDS"]
+  },
+  {
+    "name": "Risking It All",
+    "description": "For every HP missing you do 0.25% more damage (max 25%)",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "RISKING_IT_ALL",
+    "tier": 1,
+    "slots": ["CAPE"]
+  },
+  {
+    "name": "Pray By Hunger",
+    "description": "10% chance to recover prayer points when consuming food",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "PRAY_BY_HUNGER",
+    "tier": 1,
+    "slots": ["CAPE"]
+  },
+  {
+    "name": "Reduced Special",
+    "description": "Reduces special attack cost by 5%",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "SPECIAL_ATTACK",
+    "tier": 1,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Reduced Special",
+    "description": "Reduces special attack cost by 10%",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "SPECIAL_ATTACK",
+    "tier": 2,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Reduced Special",
+    "description": "Reduces special attack cost by 15%",
+    "weight": 5,
+    "block_type": "NONE",
+    "effect_type": "SPECIAL_ATTACK",
+    "tier": 3,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Fire Damage I",
+    "description": "10% chance to deal 6 fire damage to your opponent",
+    "weight": 50,
+    "block_type": "NONE",
+    "effect_type": "FIRE_ASPECT",
+    "tier": 1,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Fire Damage II",
+    "description": "10% chance to deal 9 fire damage to your opponent",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "FIRE_ASPECT",
+    "tier": 2,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Fire Damage III",
+    "description": "10% chance to deal 15 fire damage to your opponent",
+    "weight": 2,
+    "block_type": "NONE",
+    "effect_type": "FIRE_ASPECT",
+    "tier": 3,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Arrow Splitter I",
+    "description": "10% chance to split arrow attacks, hitting nearby 2 enemies",
+    "weight": 3,
+    "block_type": "NONE",
+    "effect_type": "ARROW_SPLITTER",
+    "tier": 1,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Arrow Splitter II",
+    "description": "10% chance to split arrow attacks, hitting nearby 5 enemies",
+    "weight": 2,
+    "block_type": "NONE",
+    "effect_type": "ARROW_SPLITTER",
+    "tier": 2,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Arrow Splitter III",
+    "description": "10% chance to split arrow attacks, hitting nearby 7 enemies",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "ARROW_SPLITTER",
+    "tier": 3,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Splinter Blitz I",
+    "description": "10% chance to freeze nearby 2 enemies for 2 seconds while doing cold damage",
+    "weight": 3,
+    "block_type": "NONE",
+    "effect_type": "SPLINTER_BLITZ",
+    "tier": 1,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Splinter Blitz II",
+    "description": "10% chance to freeze nearby 5 enemies for 2 seconds while doing cold damage",
+    "weight": 2,
+    "block_type": "NONE",
+    "effect_type": "SPLINTER_BLITZ",
+    "tier": 2,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Splinter Blitz III",
+    "description": "10% chance to freeze nearby 7 enemies for 2 seconds while doing cold damage",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "SPLINTER_BLITZ",
+    "tier": 3,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Slice and Dice",
+    "description": "5% chance to attack twice in a row",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "DOUBLE_TAP",
+    "tier": 1,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Slice and Dice",
+    "description": "10% chance to attack twice in a row",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "DOUBLE_TAP",
+    "tier": 2,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Slice and Dice",
+    "description": "15% chance to attack twice in a row",
+    "weight": 5,
+    "block_type": "NONE",
+    "effect_type": "DOUBLE_TAP",
+    "tier": 3,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Medusa I",
+    "description": "10% chance to turn your opponent to stone for 2 seconds",
+    "weight": 3,
+    "block_type": "NONE",
+    "effect_type": "MEDUSA",
+    "tier": 1,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Medusa II",
+    "description": "10% chance to turn your opponent to stone for 3 seconds",
+    "weight": 2,
+    "block_type": "NONE",
+    "effect_type": "MEDUSA",
+    "tier": 2,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Medusa III",
+    "description": "10% chance to turn your opponent to stone for 4 seconds",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "MEDUSA",
+    "tier": 3,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Wretched I",
+    "description": "3% chance to turn enemies against themselves",
+    "weight": 3,
+    "block_type": "NONE",
+    "effect_type": "WRETCHED",
+    "tier": 1,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Wretched II",
+    "description": "5% chance to turn enemies against themselves",
+    "weight": 2,
+    "block_type": "NONE",
+    "effect_type": "WRETCHED",
+    "tier": 2,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Wretched III",
+    "description": "10% chance to turn enemies against themselves",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "WRETCHED",
+    "tier": 3,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Seaworld",
+    "description": "Chance to catch 2 fish at once",
+    "weight": 3,
+    "block_type": "SKILLING",
+    "effect_type": "SEAWORLD",
+    "tier": 1,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Blacksmith",
+    "description": "Chance to smith 2 armours at once",
+    "weight": 3,
+    "block_type": "SKILLING",
+    "effect_type": "BLACKSMITH",
+    "tier": 1,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Shield Crash",
+    "description": "5% chance to damage a target with your shield and heal 25% of the damage amount",
+    "weight": 3,
+    "block_type": "NONE",
+    "effect_type": "SHIELDCRASH",
+    "tier": 1,
+    "slots": ["SHIELD"]
+  },
+  {
+    "name": "Holy Grace I",
+    "description": "6% chance to restore 5 prayer points on kill",
+    "weight": 60,
+    "block_type": "NONE",
+    "effect_type": "HOLY_GRACE",
+    "tier": 1,
+    "slots": ["NECK"]
+  },
+  {
+    "name": "Holy Grace II",
+    "description": "10% chance to restore 5 prayer points on kill",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "HOLY_GRACE",
+    "tier": 2,
+    "slots": ["NECK"]
+  },
+  {
+    "name": "Holy Grace III",
+    "description": "20% chance to restore 5 prayer points on kill",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "HOLY_GRACE",
+    "tier": 3,
+    "slots": ["NECK"]
+  },
+  {
+    "name": "Lucky Looter I",
+    "description": "1% chance to receive an additional drop",
+    "weight": 50,
+    "block_type": "NONE",
+    "effect_type": "LUCKY_LOOTER",
+    "tier": 1,
+    "slots": ["RING"]
+  },
+  {
+    "name": "Lucky Looter II",
+    "description": "2% chance to receive an additional drop",
+    "weight": 20,
+    "block_type": "NONE",
+    "effect_type": "LUCKY_LOOTER",
+    "tier": 2,
+    "slots": ["RING"]
+  },
+  {
+    "name": "Lucky Looter III",
+    "description": "3% chance to receive an additional drop",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "LUCKY_LOOTER",
+    "tier": 3,
+    "slots": ["RING"]
+  },
+  {
+    "name": "Master Slayer",
+    "description": "2% extra accuracy and damage while on slayer tasks per piece worn",
+    "weight": 8,
+    "block_type": "NONE",
+    "effect_type": "MASTER_SLAYER",
+    "tier": 1,
+    "slots": ["LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Dragon Slayer",
+    "description": "Buffs your accuracy and damage towards dragons by 2%",
+    "weight": 50,
+    "block_type": "NONE",
+    "effect_type": "DRAGON_SLAYER",
+    "tier": 1,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Dragon Slayer",
+    "description": "Buffs your accuracy and damage towards dragons by 3%",
+    "weight": 20,
+    "block_type": "NONE",
+    "effect_type": "DRAGON_SLAYER",
+    "tier": 2,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Dragon Slayer",
+    "description": "Buffs your accuracy and damage towards dragons by 5%",
+    "weight": 2,
+    "block_type": "NONE",
+    "effect_type": "DRAGON_SLAYER",
+    "tier": 3,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Armadyl Archer",
+    "description": "Accuracy & damage buff to Armadyl creatures by 2%",
+    "weight": 50,
+    "block_type": "NONE",
+    "effect_type": "ARMADYL_ARCHER",
+    "tier": 1,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Armadyl Archer",
+    "description": "Accuracy & damage buff to Armadyl creatures by 3%",
+    "weight": 20,
+    "block_type": "NONE",
+    "effect_type": "ARMADYL_ARCHER",
+    "tier": 2,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Armadyl Archer",
+    "description": "Accuracy & damage buff to Armadyl creatures by 5%",
+    "weight": 2,
+    "block_type": "NONE",
+    "effect_type": "ARMADYL_ARCHER",
+    "tier": 3,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Bandos Berserker",
+    "description": "Accuracy & damage buff to Bandos creatures by 2%",
+    "weight": 50,
+    "block_type": "NONE",
+    "effect_type": "BANDOS_BERSERKER",
+    "tier": 1,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Bandos Berserker",
+    "description": "Accuracy & damage buff to Bandos creatures by 3%",
+    "weight": 20,
+    "block_type": "NONE",
+    "effect_type": "BANDOS_BERSERKER",
+    "tier": 2,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Bandos Berserker",
+    "description": "Accuracy & damage buff to Bandos creatures by 5%",
+    "weight": 2,
+    "block_type": "NONE",
+    "effect_type": "BANDOS_BERSERKER",
+    "tier": 3,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Saradomin Slayer",
+    "description": "Accuracy & damage buff to Saradomin creatures by 2%",
+    "weight": 50,
+    "block_type": "NONE",
+    "effect_type": "ARMADYL_ARCHER",
+    "tier": 1,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Saradomin Slayer",
+    "description": "Accuracy & damage buff to Saradomin creatures by 3%",
+    "weight": 20,
+    "block_type": "NONE",
+    "effect_type": "ARMADYL_ARCHER",
+    "tier": 2,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Saradomin Slayer",
+    "description": "Accuracy & damage buff to Saradomin creatures by 5%",
+    "weight": 2,
+    "block_type": "NONE",
+    "effect_type": "ARMADYL_ARCHER",
+    "tier": 3,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Zamorak Zealot",
+    "description": "Accuracy & damage buff to Zamorakian creatures by 2%",
+    "weight": 50,
+    "block_type": "NONE",
+    "effect_type": "ZAMORAK_ZEALOT",
+    "tier": 1,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Zamorak Zealot",
+    "description": "Accuracy & damage buff to Zamorakian creatures by 3%",
+    "weight": 20,
+    "block_type": "NONE",
+    "effect_type": "ZAMORAK_ZEALOT",
+    "tier": 2,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Zamorak Zealot",
+    "description": "Accuracy & damage buff to Zamorakian creatures by 5%",
+    "weight": 2,
+    "block_type": "NONE",
+    "effect_type": "ZAMORAK_ZEALOT",
+    "tier": 3,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Spider Squasher",
+    "description": "Buffs your accuracy and damage towards spiders by 2%",
+    "weight": 50,
+    "block_type": "NONE",
+    "effect_type": "SPIDER_SQUASHER",
+    "tier": 1,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Spider Squasher",
+    "description": "Buffs your accuracy and damage towards spiders by 3%",
+    "weight": 20,
+    "block_type": "NONE",
+    "effect_type": "SPIDER_SQUASHER",
+    "tier": 2,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Spider Squasher",
+    "description": "Buffs your accuracy and damage towards spiders by 5%",
+    "weight": 2,
+    "block_type": "NONE",
+    "effect_type": "SPIDER_SQUASHER",
+    "tier": 3,
+    "slots": ["HEAD", "LEGS", "BODY", "FEET", "HANDS", "WEAPON", "SHIELD"]
+  },
+  {
+    "name": "Reinforced",
+    "description": "Increases melee defence by 20",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "REINFORCED",
+    "tier": 1,
+    "slots": ["SHIELD"]
+  },
+  {
+    "name": "Reinforced",
+    "description": "Increases melee defence by 25",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "REINFORCED",
+    "tier": 2,
+    "slots": ["SHIELD"]
+  },
+  {
+    "name": "Reinforced",
+    "description": "Increases melee defence by 30",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "REINFORCED",
+    "tier": 3,
+    "slots": ["SHIELD"]
+  },
+  {
+    "name": "Reinforced",
+    "description": "Increases melee defence by 40",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "REINFORCED",
+    "tier": 1,
+    "slots": ["BODY", "LEGS"]
+  },
+  {
+    "name": "Reinforced",
+    "description": "Increases melee defence by 50",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "REINFORCED",
+    "tier": 2,
+    "slots": ["BODY", "LEGS"]
+  },
+  {
+    "name": "Reinforced",
+    "description": "Increases melee defence by 60",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "REINFORCED",
+    "tier": 3,
+    "slots": ["BODY", "LEGS"]
+  },
+  {
+    "name": "Last Recall",
+    "description": "Teleports you back to your last location",
+    "weight": 10,
+    "block_type": "NONE",
+    "effect_type": "LAST_RECALL",
+    "tier": 1,
+    "slots": ["CAPE", "AMULET", "RING"]
+  },
+  {
+    "name": "Holy Grace",
+    "description": "Restores prayer points by 1 every 5 seconds",
+    "weight": 20,
+    "block_type": "NONE",
+    "effect_type": "PRAYER",
+    "tier": 1,
+    "slots": ["CAPE"]
+  },
+  {
+    "name": "Holy Grace",
+    "description": "Restores prayer points by 2 every 5 seconds",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "PRAYER",
+    "tier": 2,
+    "slots": ["CAPE"]
+  },
+  {
+    "name": "Holy Grace",
+    "description": "Restores prayer points by 3 every 5 seconds",
+    "weight": 5,
+    "block_type": "NONE",
+    "effect_type": "PRAYER",
+    "tier": 3,
+    "slots": ["CAPE"]
+  },
+  {
+    "name": "Banker's Note",
+    "description": "Notes all items in your inventory",
+    "weight": 1,
+    "block_type": "NONE",
+    "effect_type": "UTILITY",
+    "tier": 1,
+    "slots": ["CAPE"]
+  },
+  {
+    "name": "Looting",
+    "description": "Increases the amount of loot you get from monsters by 5%",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "LOOTING",
+    "tier": 1,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Looting",
+    "description": "Increases the amount of loot you get from monsters by 10%",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "LOOTING",
+    "tier": 2,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Looting",
+    "description": "Increases the amount of loot you get from monsters by 15%",
+    "weight": 5,
+    "block_type": "NONE",
+    "effect_type": "LOOTING",
+    "tier": 3,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Executioner",
+    "description": "1% chance to insta-kill at under 25 hp",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "EXECUTIONER",
+    "tier": 1,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Executioner",
+    "description": "2% chance to insta-kill at under 50 hp",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "EXECUTIONER",
+    "tier": 2,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Executioner",
+    "description": "3% chance to insta-kill at under 100 hp",
+    "weight": 5,
+    "block_type": "NONE",
+    "effect_type": "EXECUTIONER",
+    "tier": 3,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Life Steal",
+    "description": "5% chance to heal for 10% of the damage you deal",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "LIFE_STEAL",
+    "tier": 1,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Life Steal",
+    "description": "10% chance to heal for 15% of the damage you deal",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "LIFE_STEAL",
+    "tier": 2,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Life Steal",
+    "description": "15% chance to heal for 20% of the damage you deal",
+    "weight": 5,
+    "block_type": "NONE",
+    "effect_type": "LIFE_STEAL",
+    "tier": 3,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Smack Down",
+    "description": "5% chance to deal 1.5x damage",
+    "weight": 30,
+    "block_type": "NONE",
+    "effect_type": "NERFS",
+    "tier": 1,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Smack Down",
+    "description": "10% chance to deal 1.5x damage",
+    "weight": 15,
+    "block_type": "NONE",
+    "effect_type": "NERFS",
+    "tier": 2,
+    "slots": ["WEAPON"]
+  },
+  {
+    "name": "Smack Down",
+    "description": "15% chance to deal 1.5x damage",
+    "weight": 5,
+    "block_type": "NONE",
+    "effect_type": "NERFS",
+    "tier": 3,
+    "slots": ["WEAPON"]
+  }
+] 
