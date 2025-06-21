@@ -24,20 +24,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- DOM Element Cache ---
     const dom = {
-        slotButtonsContainer: document.getElementById('slot-buttons'),
-        itemListHeader: document.getElementById('item-list-header'),
-        itemList: document.getElementById('item-list'),
+        loader: document.getElementById('loader'),
+        mainContent: document.getElementById('main-content'),
+        slotButtonsContainer: document.getElementById('slot-buttons-container'),
+        itemGrid: document.getElementById('item-grid'),
+        paginationContainer: document.getElementById('pagination-container'),
         searchBar: document.getElementById('search-bar'),
-        prevPageButton: document.getElementById('prev-page'),
-        nextPageButton: document.getElementById('next-page'),
-        pageIndicator: document.getElementById('page-indicator'),
         detailsPanel: document.getElementById('details-panel'),
         detailsPlaceholder: document.getElementById('details-placeholder'),
         detailsContent: document.getElementById('details-content'),
         detailsItemName: document.getElementById('details-item-name'),
         detailsItemIcon: document.getElementById('details-item-icon'),
         orbsContainer: document.getElementById('orbs-container'),
-        orbCounts: document.getElementById('orb-counts'),
         enchantmentsTitle: document.getElementById('enchantments-title'),
         enchantmentList: document.getElementById('enchantment-list'),
     };
@@ -203,53 +201,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderOrbs() {
         dom.orbsContainer.innerHTML = '';
-        const orbs = [
-            { name: 'Annulment', id: 'annul' },
-            { name: 'Annexing', id: 'annex' },
-            { name: 'Turmoil', id: 'turmoil' },
-            { name: 'Faltering', id: 'falter' },
-        ];
-        orbs.forEach(orb => {
+        if (!state.selectedItem) return;
+
+        ORBS.forEach(orb => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'orb-button-wrapper';
+
             const button = document.createElement('button');
-            button.textContent = orb.name;
-            button.dataset.orbId = orb.id;
+            button.id = `${orb.id}-orb`;
             button.className = 'orb-button';
-            dom.orbsContainer.appendChild(button);
+            button.dataset.orbId = orb.id;
+            button.title = orb.name;
+            
+            const img = document.createElement('img');
+            img.src = orb.icon;
+            img.alt = orb.name;
+            button.appendChild(img);
+
+            const count = document.createElement('div');
+            count.className = 'orb-count-value';
+            count.id = `${orb.id}-orb-count`;
+            count.textContent = state.orbCounts[orb.id] || 0;
+
+            wrapper.appendChild(button);
+            wrapper.appendChild(count);
+            dom.orbsContainer.appendChild(wrapper);
         });
     }
 
     function renderOrbCounters() {
-        if (!state.selectedItem) {
-            dom.orbCounts.parentElement.classList.add('hidden');
-            return;
-        }
-        dom.orbCounts.parentElement.classList.remove('hidden');
+        if (!state.selectedItem) return;
 
-        dom.orbCounts.innerHTML = `
-            <div class="orb-count">
-                <div class="orb-count-label">Annulment</div>
-                <div class="orb-count-value">${state.orbCounts.annul}</div>
-            </div>
-            <div class="orb-count">
-                <div class="orb-count-label">Annexing</div>
-                <div class="orb-count-value">${state.orbCounts.annex}</div>
-            </div>
-            <div class="orb-count">
-                <div class="orb-count-label">Turmoil</div>
-                <div class="orb-count-value">${state.orbCounts.turmoil}</div>
-            </div>
-            <div class="orb-count">
-                <div class="orb-count-label">Faltering</div>
-                <div class="orb-count-value">${state.orbCounts.falter}</div>
-            </div>
-        `;
+        for (const orbId in state.orbCounts) {
+            const countElement = document.getElementById(`${orbId}-orb-count`);
+            if (countElement) {
+                countElement.textContent = state.orbCounts[orbId];
+            }
+        }
     }
 
     function renderDetailsPanel() {
         if (!state.selectedItem) {
             dom.detailsPlaceholder.classList.remove('hidden');
             dom.detailsContent.classList.add('hidden');
-            renderOrbCounters();
             return;
         }
 
