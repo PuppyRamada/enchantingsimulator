@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Running new script version 1.1...');
     // --- Constants and State ---
-    const API_BASE_URL = 'https://www.osrsbox.com/osrsbox-db/items-icons/';
+    const API_BASE_URL = 'https://kano.gg/assets/images/items_hd/';
     const SLOT_MAP = {
         'HEAD': 'head', 'CAPE': 'cape', 'NECK': 'neck', 'WEAPON': 'weapon',
         'BODY': 'body', 'SHIELD': 'shield', 'LEGS': 'legs', 'HANDS': 'hands',
@@ -40,6 +40,13 @@ document.addEventListener('DOMContentLoaded', () => {
         enchantmentList: document.getElementById('enchantment-list'),
     };
 
+    // Check if all required DOM elements are found
+    const missingElements = Object.entries(dom).filter(([name, element]) => !element).map(([name]) => name);
+    if (missingElements.length > 0) {
+        console.error('Missing DOM elements:', missingElements);
+        throw new Error(`Required DOM elements not found: ${missingElements.join(', ')}`);
+    }
+
     // --- Initialization ---
     async function init() {
         try {
@@ -73,13 +80,27 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- Event Listeners ---
     function setupEventListeners() {
-        dom.slotButtonsContainer.addEventListener('click', handleSlotSelection);
-        dom.searchBar.addEventListener('input', handleSearch);
-        dom.prevPageButton.addEventListener('click', () => changePage(-1));
-        dom.nextPageButton.addEventListener('click', () => changePage(1));
-        dom.itemList.addEventListener('click', handleItemSelection);
-        dom.enchantmentsTitle.addEventListener('click', toggleEnchantmentView);
-        dom.orbsContainer.addEventListener('click', handleOrbApplication);
+        if (dom.slotButtonsContainer) {
+            dom.slotButtonsContainer.addEventListener('click', handleSlotSelection);
+        }
+        if (dom.searchBar) {
+            dom.searchBar.addEventListener('input', handleSearch);
+        }
+        if (dom.prevPageButton) {
+            dom.prevPageButton.addEventListener('click', () => changePage(-1));
+        }
+        if (dom.nextPageButton) {
+            dom.nextPageButton.addEventListener('click', () => changePage(1));
+        }
+        if (dom.itemList) {
+            dom.itemList.addEventListener('click', handleItemSelection);
+        }
+        if (dom.enchantmentsTitle) {
+            dom.enchantmentsTitle.addEventListener('click', toggleEnchantmentView);
+        }
+        if (dom.orbsContainer) {
+            dom.orbsContainer.addEventListener('click', handleOrbApplication);
+        }
     }
     
     // --- Event Handlers ---
@@ -143,6 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderSlotButtons() {
+        if (!dom.slotButtonsContainer) return;
+        
         dom.slotButtonsContainer.innerHTML = '';
         for (const key in SLOT_MAP) {
             const slot = SLOT_MAP[key];
@@ -161,6 +184,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderItems() {
+        if (!dom.itemList) return;
+        
         dom.itemList.innerHTML = '';
         const filteredItems = getFilteredItems();
         const paginatedItems = filteredItems.slice(
@@ -185,6 +210,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function renderPagination() {
+        if (!dom.pageIndicator || !dom.prevPageButton || !dom.nextPageButton || !dom.itemListHeader) return;
+        
         const filteredItems = getFilteredItems();
         const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
         state.currentPage = Math.max(0, Math.min(state.currentPage, totalPages - 1));
