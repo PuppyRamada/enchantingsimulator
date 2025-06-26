@@ -28,11 +28,8 @@ A web-based simulator for enchanting and customizing equipment, inspired by OSRS
    - Paste a seed string and click "Load Seed" to instantly load a shared setup
    - The seed includes item, slot, orb counts, and enchantments
 
-4. **Target Creature Toggles**
-   - In the details panel, use the checkboxes to toggle target creature types (Saradomin, Bandos, Zamorak, Armadyl, Dragon, Spider)
-   - Some enchantments have special effects when these toggles are enabled
 
-5. **Equipment Stats & DPS**
+4. **Equipment Stats & DPS**
    - (Currently Disabled) The equipment stats and DPS calculation panels are hidden for now. These features will be re-enabled in a future update.
 
 ## Running Locally
