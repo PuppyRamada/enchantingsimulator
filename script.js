@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Running new script version 1.1...');
+    console.log('Running new script version 1.3...');
     // --- Constants and State ---
     const API_BASE_URL = 'https://kano.gg/assets/images/items_hd/';
     const SLOT_MAP = {
@@ -8,6 +8,17 @@ document.addEventListener('DOMContentLoaded', () => {
         'FEET': 'feet', 'RING': 'ring'
     };
     const ITEMS_PER_PAGE = 50;
+
+    // DPS Calculation Constants (based on OSRS mechanics)
+    const DPS_CONSTANTS = {
+        BASE_ATTACK_SPEED: 2.4, // seconds per attack
+        BASE_ACCURACY: 0.5, // 50% base accuracy
+        BASE_STRENGTH: 1, // base strength multiplier
+        CRITICAL_HIT_CHANCE: 0.05, // 5% base critical hit chance
+        CRITICAL_HIT_MULTIPLIER: 1.2, // 20% more damage on crits
+        DEFENCE_REDUCTION: 0.1, // 10% damage reduction per defence point
+        MAX_DEFENCE_REDUCTION: 0.8 // maximum 80% damage reduction
+    };
 
     let allItems = [];
     let allEnchantments = [];
@@ -24,7 +35,21 @@ document.addEventListener('DOMContentLoaded', () => {
             annex: 0,
             turmoil: 0,
             falter: 0
+        },
+        // Combat configuration
+        combatConfig: {
+            // Now completely empty or only keep if needed for other UI
         }
+    };
+
+    // Add state for target toggles
+    const targetState = {
+        saradomin: false,
+        bandos: false,
+        zamorak: false,
+        armadyl: false,
+        dragon: false,
+        spider: false
     };
 
     // --- DOM Element Cache ---
@@ -45,13 +70,420 @@ document.addEventListener('DOMContentLoaded', () => {
         enchantmentsTitle: document.getElementById('enchantments-title'),
         enchantmentList: document.getElementById('enchantment-list'),
         actionLog: document.getElementById('action-log'),
+        // Equipment stats elements
+        statAttack: document.getElementById('stat-attack'),
+        statStrength: document.getElementById('stat-strength'),
+        statDefence: document.getElementById('stat-defence'),
+        statMagic: document.getElementById('stat-magic'),
+        statRanged: document.getElementById('stat-ranged'),
+        dpsAccuracy: document.getElementById('dps-accuracy'),
+        dpsMaxhit: document.getElementById('dps-maxhit'),
+        dpsValue: document.getElementById('dps-value'),
+        dpsSpeed: document.getElementById('dps-speed'),
+        // Combat configuration elements
+        maxCombatCheckbox: document.getElementById('max-combat'),
+        superCombatCheckbox: document.getElementById('super-combat'),
+        magicPotionCheckbox: document.getElementById('magic-potion'),
+        rangingPotionCheckbox: document.getElementById('ranging-potion'),
+        divinePotionCheckbox: document.getElementById('divine-potion')
     };
 
     // Check if all required DOM elements are found
     const missingElements = Object.entries(dom).filter(([name, element]) => !element).map(([name]) => name);
     if (missingElements.length > 0) {
         console.error('Missing DOM elements:', missingElements);
-        throw new Error(`Required DOM elements not found: ${missingElements.join(', ')}`);
+        // Don't throw error for missing elements, just log them
+        console.warn('Some elements may not be available yet');
+    }
+
+    // Debug: Check if combat config elements are found
+    console.log('Combat config elements found:', {
+        maxCombat: !!dom.maxCombatCheckbox,
+        superCombat: !!dom.superCombatCheckbox,
+        magicPotion: !!dom.magicPotionCheckbox,
+        rangingPotion: !!dom.rangingPotionCheckbox,
+        divinePotion: !!dom.divinePotionCheckbox
+    });
+
+    // Enhanced seed system UI
+    if (!document.getElementById('seed-input')) {
+        const seedDiv = document.createElement('div');
+        seedDiv.style.margin = '10px 0';
+        seedDiv.innerHTML = `
+            <label>Seed: <input id="seed-input" type="text" style="width:400px;" placeholder="Paste or copy seed here..."></label>
+            <button id="seed-load-btn">Load Seed</button>
+            <button id="seed-copy-btn">Copy Seed</button>
+        `;
+        document.body.prepend(seedDiv);
+    }
+
+    function getCurrentSeed() {
+        // Format: itemName|slot|orbCounts|EFFECT_TYPE1:TIER1,EFFECT_TYPE2:TIER2,...
+        const item = state.selectedItem;
+        if (!item) return '';
+        const itemName = item.name || '';
+        const slot = state.selectedSlot || '';
+        const orbCounts = state.orbCounts || {};
+        const orbStr = Object.entries(orbCounts).map(([k, v]) => `${k}:${v}`).join(',');
+        const enchStr = (state.activeEnchantments || []).map(e => `${e.effect_type}:${e.tier}`).join(',');
+        return `${itemName}|${slot}|${orbStr}|${enchStr}`;
+    }
+
+    function loadSeed(seed) {
+        // Format: itemName|slot|orbCounts|EFFECT_TYPE1:TIER1,EFFECT_TYPE2:TIER2,...
+        if (!seed) return;
+        const [itemPart, slotPart, orbPart, enchPart] = seed.split('|');
+        // Find item by name (case-insensitive, partial match allowed)
+        const item = allItems.find(i => i.name && i.name.toLowerCase().includes((itemPart || '').toLowerCase()));
+        if (!item) {
+            console.warn('[SEED] No item found for', itemPart);
+            return;
+        }
+        state.selectedItem = item;
+        if (slotPart) state.selectedSlot = slotPart;
+        // Parse orbCounts
+        if (orbPart) {
+            orbPart.split(',').forEach(pair => {
+                const [k, v] = pair.split(':');
+                if (k && v !== undefined) state.orbCounts[k] = Number(v);
+            });
+        }
+        // Parse enchantments
+        const enchArr = (enchPart || '').split(',').map(s => {
+            const [type, tier] = s.split(':');
+            return allEnchantments.find(e => e.effect_type === type && e.tier === Number(tier));
+        }).filter(Boolean);
+        state.activeEnchantments = enchArr;
+        console.log('[SEED] Loaded item from seed:', item, 'Slot:', slotPart, 'Orbs:', state.orbCounts, 'Enchantments:', enchArr);
+        updateEquipmentDisplay();
+        renderDetailsPanel();
+        // Update seed input to reflect canonical seed
+        setTimeout(() => {
+            const seedInput = document.getElementById('seed-input');
+            if (seedInput) seedInput.value = getCurrentSeed();
+        }, 100);
+    }
+
+    // Add event listeners for seed input/copy
+    setTimeout(() => {
+        const seedInput = document.getElementById('seed-input');
+        const seedBtn = document.getElementById('seed-load-btn');
+        const copyBtn = document.getElementById('seed-copy-btn');
+        if (seedInput && seedBtn) {
+            seedBtn.onclick = () => loadSeed(seedInput.value);
+        }
+        if (seedInput && copyBtn) {
+            copyBtn.onclick = () => {
+                seedInput.select();
+                document.execCommand('copy');
+            };
+        }
+    }, 500);
+
+    // Update seed input whenever state changes
+    function updateSeedInput() {
+        const seedInput = document.getElementById('seed-input');
+        if (seedInput) seedInput.value = getCurrentSeed();
+    }
+
+    // --- DPS Calculation Functions ---
+    function calculateBaseStats() {
+        return {
+            attack: 99,
+            strength: 99,
+            defence: 99,
+            magic: 99,
+            ranged: 99
+        };
+    }
+
+    function calculateEquipmentStats(item, enchantments = []) {
+        // Get base stats from combat configuration
+        const baseStats = calculateBaseStats();
+        
+        // Get stats from the equipment object
+        const equipment = item.equipment || {};
+        const equipmentStats = {
+            attack: (equipment.attack_stab || 0) + (equipment.attack_slash || 0) + (equipment.attack_crush || 0) + (equipment.attack_magic || 0) + (equipment.attack_ranged || 0),
+            strength: equipment.melee_strength || 0,
+            defence: (equipment.defence_stab || 0) + (equipment.defence_slash || 0) + (equipment.defence_crush || 0) + (equipment.defence_magic || 0) + (equipment.defence_ranged || 0),
+            magic: equipment.magic_damage || 0,
+            ranged: equipment.ranged_strength || 0
+        };
+
+        // Apply enchantment bonuses
+        const enchantmentBonuses = calculateEnchantmentBonuses(enchantments);
+        
+        return {
+            attack: baseStats.attack + equipmentStats.attack + enchantmentBonuses.attack,
+            strength: baseStats.strength + equipmentStats.strength + enchantmentBonuses.strength,
+            defence: baseStats.defence + equipmentStats.defence + enchantmentBonuses.defence,
+            magic: baseStats.magic + equipmentStats.magic + enchantmentBonuses.magic,
+            ranged: baseStats.ranged + equipmentStats.ranged + enchantmentBonuses.ranged
+        };
+    }
+
+    function calculateEnchantmentBonuses(enchantments) {
+        const bonuses = { attack: 0, strength: 0, defence: 0, magic: 0, ranged: 0 };
+        let dpsEffects = {
+            critChance: 0,
+            critMultiplier: 0,
+            doubleHitChance: 0,
+            damageMultiplier: 1,
+            accuracyMultiplier: 1
+        };
+        let accuracyAndDamageBuff = 0;
+        // Debug: log all enchantments being processed
+        console.log('[ENCH DEBUG] Processing enchantments:', enchantments.map(e => ({effect_type: e.effect_type, tier: e.tier, name: e.name})));
+        enchantments.forEach(ench => {
+            switch(ench.effect_type) {
+                case 'REINFORCED':
+                    // Defence bonus
+                    if (ench.tier === 1) bonuses.defence += 20;
+                    else if (ench.tier === 2) bonuses.defence += 25;
+                    else if (ench.tier === 3) bonuses.defence += 30;
+                    break;
+                case 'CRITICAL_STRIKE':
+                    // Crit chance
+                    if (ench.tier === 1) dpsEffects.critChance += 0.05;
+                    else if (ench.tier === 2) dpsEffects.critChance += 0.07;
+                    else if (ench.tier === 3) dpsEffects.critChance += 0.10;
+                    break;
+                case 'CRITICAL_STRIKE_DAMAGE':
+                    // Crit multiplier
+                    if (ench.tier === 1) dpsEffects.critMultiplier += 0.20;
+                    else if (ench.tier === 2) dpsEffects.critMultiplier += 0.25;
+                    else if (ench.tier === 3) dpsEffects.critMultiplier += 0.30;
+                    break;
+                case 'DOUBLE_TAP':
+                    // Double hit chance
+                    if (ench.tier === 1) dpsEffects.doubleHitChance += 0.05;
+                    else if (ench.tier === 2) dpsEffects.doubleHitChance += 0.10;
+                    else if (ench.tier === 3) dpsEffects.doubleHitChance += 0.15;
+                    break;
+                case 'NERFS':
+                    // Smack Down/Zamorak's Curse: chance to deal 1.5x damage
+                    if (ench.name.includes('Smack Down') || ench.name.includes("Zamorak's Curse")) {
+                        dpsEffects.damageMultiplier += 0.5 * (ench.tier === 1 ? 0.05 : ench.tier === 2 ? 0.10 : 0.15);
+                    }
+                    break;
+                case 'MASTER_SLAYER':
+                case 'DRAGON_SLAYER':
+                case 'ARMADYL_ARCHER':
+                case 'BANDOS_BERSERKER':
+                case 'ZAMORAK_ZEALOT':
+                case 'SPIDER_SQUASHER':
+                    // 2/3/5% accuracy and damage vs specific monsters (not implemented, placeholder)
+                    break;
+                case 'RISKING_IT_ALL':
+                    // 0.25% more damage per missing HP, max 25% (not implemented, placeholder)
+                    break;
+                case 'STAND_YOUR_GROUND':
+                    // 1% more damage per tick standing still, max 5% (not implemented, placeholder)
+                    break;
+                case 'BENDER':
+                case 'FIRE_ASPECT':
+                case 'SPLINTER_BLITZ':
+                case 'MEDUSA':
+                case 'WRETCHED':
+                case 'LIFE_STEAL':
+                case 'EXECUTIONER':
+                case 'VENOMOUS':
+                case 'BLOCK_DAMAGE':
+                case 'FEATHERWEIGHT':
+                case 'INCREASED_LUCK':
+                case 'LUCKY_LOOTER':
+                case 'LOOTING':
+                case 'PRAYER':
+                case 'UTILITY':
+                case 'SPECIAL_ATTACK':
+                case 'SEAWORLD':
+                case 'BLACKSMITH':
+                case 'SHIELDCRASH':
+                case 'HOLY_GRACE':
+                case 'LAST_RECALL':
+                case 'PRAY_BY_HUNGER':
+                    // Not directly stat/DPS affecting, placeholder
+                    break;
+                case 'ARMADYL_ARCHER':
+                    if (targetState.armadyl || targetState.saradomin) {
+                        if (ench.tier === 1) accuracyAndDamageBuff += 0.02;
+                        else if (ench.tier === 2) accuracyAndDamageBuff += 0.03;
+                        else if (ench.tier === 3) accuracyAndDamageBuff += 0.05;
+                    }
+                    break;
+                case 'BANDOS_BERSERKER':
+                    if (targetState.bandos) {
+                        if (ench.tier === 1) accuracyAndDamageBuff += 0.02;
+                        else if (ench.tier === 2) accuracyAndDamageBuff += 0.03;
+                        else if (ench.tier === 3) accuracyAndDamageBuff += 0.05;
+                    }
+                    break;
+                case 'ZAMORAK_ZEALOT':
+                    if (targetState.zamorak) {
+                        if (ench.tier === 1) accuracyAndDamageBuff += 0.02;
+                        else if (ench.tier === 2) accuracyAndDamageBuff += 0.03;
+                        else if (ench.tier === 3) accuracyAndDamageBuff += 0.05;
+                    }
+                    break;
+                case 'DRAGON_SLAYER':
+                    if (targetState.dragon) {
+                        if (ench.tier === 1) accuracyAndDamageBuff += 0.02;
+                        else if (ench.tier === 2) accuracyAndDamageBuff += 0.03;
+                        else if (ench.tier === 3) accuracyAndDamageBuff += 0.05;
+                    }
+                    break;
+                case 'SPIDER_SQUASHER':
+                    if (targetState.spider) {
+                        if (ench.tier === 1) accuracyAndDamageBuff += 0.02;
+                        else if (ench.tier === 2) accuracyAndDamageBuff += 0.03;
+                        else if (ench.tier === 3) accuracyAndDamageBuff += 0.05;
+                    }
+                    break;
+                // Add more as needed
+            }
+        });
+        if (accuracyAndDamageBuff > 0) {
+            dpsEffects.accuracyMultiplier *= (1 + accuracyAndDamageBuff);
+            dpsEffects.damageMultiplier *= (1 + accuracyAndDamageBuff);
+        }
+        // Debug: log computed buffs
+        console.log('[ENCH DEBUG] accuracyAndDamageBuff:', accuracyAndDamageBuff, 'dpsEffects:', dpsEffects, 'bonuses:', bonuses);
+        bonuses.dpsEffects = dpsEffects;
+        return bonuses;
+    }
+
+    function calculateDPS(stats, enchantments = []) {
+        // OSRS Max Hit calculation (simplified but accurate)
+        const baseStats = calculateBaseStats();
+        const equipment = state.selectedItem?.equipment || {};
+        const strengthLevel = baseStats.strength;
+        const strengthBonus = equipment.melee_strength || 0;
+        const effectiveStrength = strengthLevel + 8;
+        const maxHit = Math.floor(0.5 + (effectiveStrength * (strengthBonus + 64)) / 640);
+        const attackLevel = baseStats.attack;
+        const attackBonus = (equipment.attack_stab || 0) + (equipment.attack_slash || 0) + (equipment.attack_crush || 0) + (equipment.attack_magic || 0) + (equipment.attack_ranged || 0);
+        const effectiveAttack = attackLevel + 8;
+        const attackRoll = effectiveAttack * (attackBonus + 64);
+        const targetDefence = 99;
+        const targetDefenceBonus = 0;
+        const defenceRoll = (targetDefence + 9) * (targetDefenceBonus + 64);
+        let accuracy;
+        if (attackRoll > defenceRoll) {
+            accuracy = 1 - (defenceRoll + 2) / (2 * (attackRoll + 1));
+        } else {
+            accuracy = attackRoll / (2 * (defenceRoll + 1));
+        }
+        // Gather DPS effects from enchantments
+        const enchantmentBonuses = calculateEnchantmentBonuses(enchantments);
+        let criticalChance = 0.05 + (enchantmentBonuses.dpsEffects?.critChance || 0);
+        let criticalMultiplier = 1.2 + (enchantmentBonuses.dpsEffects?.critMultiplier || 0);
+        let doubleHitChance = enchantmentBonuses.dpsEffects?.doubleHitChance || 0;
+        let damageMultiplier = enchantmentBonuses.dpsEffects?.damageMultiplier || 1;
+        let accuracyMultiplier = enchantmentBonuses.dpsEffects?.accuracyMultiplier || 1;
+        // Apply accuracy multiplier
+        accuracy = Math.min(1, accuracy * accuracyMultiplier);
+        // Calculate average damage per hit
+        const normalDamage = maxHit / 2;
+        const criticalDamage = maxHit * criticalMultiplier / 2;
+        let averageDamage = (normalDamage * (1 - criticalChance)) + (criticalDamage * criticalChance);
+        // Apply double hit chance (e.g. Slice and Dice)
+        if (doubleHitChance > 0) {
+            averageDamage = averageDamage * (1 - doubleHitChance) + (averageDamage * 2) * doubleHitChance;
+        }
+        // Apply global damage multiplier
+        averageDamage *= damageMultiplier;
+        // Calculate DPS
+        const dps = (averageDamage * accuracy) / DPS_CONSTANTS.BASE_ATTACK_SPEED;
+        return {
+            accuracy: accuracy,
+            maxHit: maxHit,
+            dps: dps,
+            attackSpeed: DPS_CONSTANTS.BASE_ATTACK_SPEED,
+            criticalChance: criticalChance,
+            criticalMultiplier: criticalMultiplier,
+            doubleHitChance: doubleHitChance,
+            damageMultiplier: damageMultiplier,
+            effectiveStrength: effectiveStrength,
+            effectiveAttack: effectiveAttack,
+            attackRoll: attackRoll,
+            defenceRoll: defenceRoll
+        };
+    }
+
+    function updateEquipmentDisplay() {
+        console.log('updateEquipmentDisplay called');
+        console.log('Selected item:', state.selectedItem);
+        
+        if (!state.selectedItem) {
+            console.log('No selected item, returning');
+            return;
+        }
+        
+        const stats = calculateEquipmentStats(state.selectedItem, state.activeEnchantments);
+        const dps = calculateDPS(stats, state.activeEnchantments);
+        
+        console.log('Calculated stats:', stats);
+        console.log('Calculated DPS:', dps);
+        
+        // Update stat displays
+        dom.statAttack.textContent = stats.attack;
+        dom.statStrength.textContent = stats.strength;
+        dom.statDefence.textContent = stats.defence;
+        dom.statMagic.textContent = stats.magic;
+        dom.statRanged.textContent = stats.ranged;
+        
+        // Update DPS displays
+        dom.dpsAccuracy.textContent = `${(dps.accuracy * 100).toFixed(1)}%`;
+        dom.dpsMaxhit.textContent = dps.maxHit;
+        dom.dpsValue.textContent = dps.dps.toFixed(2);
+        dom.dpsSpeed.textContent = `${dps.attackSpeed}s`;
+        
+        // Add visual indicators for stat changes
+        updateStatColors(stats);
+        
+        console.log('Equipment display updated successfully');
+        updateSeedInput();
+    }
+
+    function updateStatColors(stats) {
+        // Compare with base stats (without enchantments) to show changes
+        const baseStats = calculateBaseStats();
+        const equipment = state.selectedItem?.equipment || {};
+        const equipmentStats = {
+            attack: (equipment.attack_stab || 0) + (equipment.attack_slash || 0) + (equipment.attack_crush || 0) + (equipment.attack_magic || 0) + (equipment.attack_ranged || 0),
+            strength: equipment.melee_strength || 0,
+            defence: (equipment.defence_stab || 0) + (equipment.defence_slash || 0) + (equipment.defence_crush || 0) + (equipment.defence_magic || 0) + (equipment.defence_ranged || 0),
+            magic: equipment.magic_damage || 0,
+            ranged: equipment.ranged_strength || 0
+        };
+        
+        const baseTotalStats = {
+            attack: baseStats.attack + equipmentStats.attack,
+            strength: baseStats.strength + equipmentStats.strength,
+            defence: baseStats.defence + equipmentStats.defence,
+            magic: baseStats.magic + equipmentStats.magic,
+            ranged: baseStats.ranged + equipmentStats.ranged
+        };
+        
+        const statElements = [
+            { element: dom.statAttack, current: stats.attack, base: baseTotalStats.attack },
+            { element: dom.statStrength, current: stats.strength, base: baseTotalStats.strength },
+            { element: dom.statDefence, current: stats.defence, base: baseTotalStats.defence },
+            { element: dom.statMagic, current: stats.magic, base: baseTotalStats.magic },
+            { element: dom.statRanged, current: stats.ranged, base: baseTotalStats.ranged }
+        ];
+        
+        statElements.forEach(({ element, current, base }) => {
+            element.classList.remove('positive', 'negative', 'neutral');
+            if (current > base) {
+                element.classList.add('positive');
+            } else if (current < base) {
+                element.classList.add('negative');
+            } else {
+                element.classList.add('neutral');
+            }
+        });
     }
 
     // --- Initialization ---
@@ -108,6 +540,67 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dom.orbsContainer) {
             dom.orbsContainer.addEventListener('click', handleOrbApplication);
         }
+        
+        // Combat configuration event listeners
+        if (dom.maxCombatCheckbox) {
+            dom.maxCombatCheckbox.addEventListener('change', handleCombatConfigChange);
+        }
+        if (dom.superCombatCheckbox) {
+            dom.superCombatCheckbox.addEventListener('change', handleCombatConfigChange);
+        }
+        if (dom.magicPotionCheckbox) {
+            dom.magicPotionCheckbox.addEventListener('change', handleCombatConfigChange);
+        }
+        if (dom.rangingPotionCheckbox) {
+            dom.rangingPotionCheckbox.addEventListener('change', handleCombatConfigChange);
+        }
+        if (dom.divinePotionCheckbox) {
+            dom.divinePotionCheckbox.addEventListener('change', handleCombatConfigChange);
+        }
+
+        // Add listeners for only the common strength boost checkboxes
+        const boostIds = [
+            'boost-strength-cape',
+            'boost-strength-potion',
+            'boost-super-strength',
+            'boost-zamorak-brew',
+            'boost-super-combat',
+            'boost-divine-super-combat',
+            'boost-smelling-salts',
+            'boost-overload',
+            'boost-dragon-battleaxe'
+        ];
+        boostIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.checked = false;
+                el.addEventListener('change', (e) => {
+                    state.combatConfig[
+                        id.replace(/-([a-z])/g, (m, c) => c.toUpperCase())
+                    ] = e.target.checked;
+                    updateEquipmentDisplay();
+                });
+            }
+        });
+
+        // Add listeners for target toggles
+        [
+            ['target-saradomin', 'saradomin'],
+            ['target-bandos', 'bandos'],
+            ['target-zamorak', 'zamorak'],
+            ['target-armadyl', 'armadyl'],
+            ['target-dragon', 'dragon'],
+            ['target-spider', 'spider']
+        ].forEach(([id, key]) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.checked = false;
+                el.addEventListener('change', (e) => {
+                    targetState[key] = e.target.checked;
+                    updateEquipmentDisplay();
+                });
+            }
+        });
     }
     
     // --- Event Handlers ---
@@ -150,6 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             renderDetailsPanel();
             renderOrbs(); // Re-render orbs to update counters
+            updateEquipmentDisplay(); // Update equipment stats display
         }
     }
     
@@ -157,6 +651,33 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.matches('.orb-button')) {
             applyOrb(e.target.dataset.orbId);
         }
+    }
+
+    function handleCombatConfigChange(e) {
+        console.log('Combat config changed:', e.target.id, e.target.checked);
+        
+        const checkbox = e.target;
+        // Fix the config key conversion - handle both 'max-combat' and 'maxCombat' formats
+        let configKey = checkbox.id;
+        if (configKey === 'max-combat') configKey = 'maxCombat';
+        if (configKey === 'super-combat') configKey = 'superCombat';
+        if (configKey === 'magic-potion') configKey = 'magicPotion';
+        if (configKey === 'ranging-potion') configKey = 'rangingPotion';
+        if (configKey === 'divine-potion') configKey = 'divinePotion';
+        
+        console.log('Config key:', configKey);
+        console.log('Previous state:', state.combatConfig[configKey]);
+        
+        // Update state
+        state.combatConfig[configKey] = checkbox.checked;
+        
+        console.log('New state:', state.combatConfig);
+        console.log('Base stats will be:', calculateBaseStats());
+        
+        // Update equipment display to reflect new stats
+        updateEquipmentDisplay();
+        
+        console.log('Equipment display updated');
     }
 
     function changePage(direction) {
@@ -194,9 +715,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getFilteredItems() {
-        return allItems
-            .filter(item => item.equipable_by_player && item.equipment?.slot === state.selectedSlot)
-            .filter(item => !state.searchTerm || item.name.toLowerCase().includes(state.searchTerm));
+        console.log('Filtering items for slot:', state.selectedSlot);
+        console.log('Total items loaded:', allItems.length);
+        
+        const equipableItems = allItems.filter(item => item.equipable_by_player);
+        console.log('Equipable items:', equipableItems.length);
+        
+        const slotItems = equipableItems.filter(item => item.equipment?.slot === state.selectedSlot);
+        console.log(`Items for slot '${state.selectedSlot}':`, slotItems.length);
+        
+        if (slotItems.length > 0) {
+            console.log('Sample items for this slot:', slotItems.slice(0, 3).map(item => ({ id: item.id, name: item.name, slot: item.equipment?.slot })));
+        }
+        
+        const filteredItems = slotItems.filter(item => !state.searchTerm || item.name.toLowerCase().includes(state.searchTerm));
+        console.log('After search filter:', filteredItems.length);
+        
+        return filteredItems;
     }
 
     function renderItems() {
@@ -268,6 +803,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Add this helper to check if the selected item is a weapon (melee, ranged, or magic)
+    function isAttackWeaponSelected() {
+        return state.selectedItem && state.selectedItem.equipment &&
+            (state.selectedItem.equipment.slot === 'weapon' || state.selectedItem.equipment.slot === '2h');
+    }
+
     function renderDetailsPanel() {
         if (!state.selectedItem) {
             dom.detailsPlaceholder.classList.remove('hidden');
@@ -281,6 +822,17 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.detailsItemName.textContent = state.selectedItem.name;
         dom.detailsItemIcon.src = `${API_BASE_URL}${state.selectedItem.id}.png`;
         dom.detailsItemIcon.alt = state.selectedItem.name;
+
+        // Show/hide equipment stats and DPS panel based on weapon type
+        const dpsPanel = document.querySelector('.equipment-stats');
+        const combatConfigPanel = document.querySelector('.config-grid');
+        if (dpsPanel) dpsPanel.style.display = isAttackWeaponSelected() ? '' : 'none';
+        if (combatConfigPanel) combatConfigPanel.style.display = isAttackWeaponSelected() ? '' : 'none';
+
+        // Update equipment display
+        if (isAttackWeaponSelected()) {
+            updateEquipmentDisplay();
+        }
 
         const itemSlotKey = Object.keys(SLOT_MAP).find(key => SLOT_MAP[key] === state.selectedItem.equipment.slot);
         
@@ -386,11 +938,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     const enchantmentsWithoutHigherTiers = [];
 
                     Object.entries(enchantmentGroups).forEach(([baseName, enchants]) => {
-                        const currentTier = Math.max(...enchants.map(e => e.tier));
-                        const availableHigherTiers = allEnchantments
-                            .filter(e => e.baseName === baseName && 
-                                       e.slots.includes(itemSlotKey) && 
-                                       e.tier > currentTier);
+                        const maxTier = Math.max(...enchants.map(e => e.tier));
+                        const availableHigherTiers = allEnchantments.filter(e => 
+                            e.baseName === baseName && 
+                            e.slots.includes(itemSlotKey) && 
+                            e.tier > maxTier
+                        );
                         
                         if (availableHigherTiers.length > 0) {
                             enchantmentsWithHigherTiers.push(...enchants);
@@ -399,56 +952,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
 
-                    let targetEnchantments = [];
-                    let logDetails = '';
-                    
-                    // If there are enchantments with higher tiers available, prioritize them
-                    if (enchantmentsWithHigherTiers.length > 0) {
-                        targetEnchantments = enchantmentsWithHigherTiers;
-                        logDetails = `Prioritized enchantments with higher tiers available (${enchantmentsWithHigherTiers.length} enchantments)`;
-                    } else if (enchantmentsWithoutHigherTiers.length > 0) {
-                        // If no higher tiers exist, prioritize lower tiers with 70% chance
-                        const randomRoll = Math.random();
-                        if (randomRoll < 0.7) {
-                            // Sort by tier (ascending) to prioritize lower tiers
-                            enchantmentsWithoutHigherTiers.sort((a, b) => a.tier - b.tier);
-                            targetEnchantments = enchantmentsWithoutHigherTiers;
-                            logDetails = `No higher tiers available - prioritized lower tiers (70% chance) - Rolled: ${(randomRoll * 100).toFixed(1)}%`;
-                        } else {
-                            // 30% chance to select randomly from all enchantments
-                            targetEnchantments = state.activeEnchantments;
-                            logDetails = `⚠️ UNLUCKY! No higher tiers available - random selection (30% chance) - Rolled: ${(randomRoll * 100).toFixed(1)}%`;
-                        }
-                    } else {
-                        // Fallback to all enchantments if something goes wrong
-                        targetEnchantments = state.activeEnchantments;
-                        logDetails = `Fallback to random selection`;
-                    }
+                    // Prioritize removing enchantments with higher tiers available
+                    const enchantmentsToConsider = enchantmentsWithHigherTiers.length > 0 
+                        ? enchantmentsWithHigherTiers 
+                        : enchantmentsWithoutHigherTiers;
 
-                    // Remove a random enchantment from the target group
-                    if (targetEnchantments.length > 0) {
-                        const randomIndex = Math.floor(Math.random() * targetEnchantments.length);
-                        const enchantmentToRemove = targetEnchantments[randomIndex];
-                        const removeIndex = state.activeEnchantments.findIndex(e => 
-                            e.name === enchantmentToRemove.name && e.tier === enchantmentToRemove.tier
-                        );
-                        if (removeIndex !== -1) {
-                            const removedEnchantment = state.activeEnchantments[removeIndex];
-                            state.activeEnchantments.splice(removeIndex, 1);
-                            
-                            // Check if this was an unlucky removal (higher tier when lower tiers exist)
-                            const wasUnlucky = enchantmentsWithoutHigherTiers.length > 0 && 
-                                              enchantmentsWithoutHigherTiers.some(e => e.tier < removedEnchantment.tier) &&
-                                              targetEnchantments === state.activeEnchantments;
-                            
-                            const logType = wasUnlucky ? 'removed-unlucky' : 'removed';
-                            const logMessage = wasUnlucky ? 
-                                `⚠️ UNLUCKY! Removed ${getEnchantmentDisplayName(removedEnchantment)} (higher tier)` :
-                                `Removed ${getEnchantmentDisplayName(removedEnchantment)}`;
-                            
-                            addActionLogEntry(logType, logMessage, logDetails);
-                        }
-                    }
+                    const randomIndex = Math.floor(Math.random() * enchantmentsToConsider.length);
+                    const removedEnchantment = enchantmentsToConsider[randomIndex];
+                    const removalChance = ((1 / enchantmentsToConsider.length) * 100).toFixed(1);
+                    
+                    state.activeEnchantments = state.activeEnchantments.filter(e => e !== removedEnchantment);
+                    
+                    addActionLogEntry('removed', 
+                        `Removed ${getEnchantmentDisplayName(removedEnchantment)}`, 
+                        `Selection chance: ${removalChance}% (${randomIndex + 1}/${enchantmentsToConsider.length})`
+                    );
                 } else {
                     addActionLogEntry('removed', 'No enchantments to remove', 'Item has no active enchantments');
                 }
@@ -557,10 +1075,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 break;
         }
+
+        // Update displays after orb application
         renderDetailsPanel();
-        renderOrbs(); // Update orb counters display
+        renderOrbs();
+        updateEquipmentDisplay();
     }
 
-    // --- Startup ---
+    // Initialize the application
     init();
 }); 

@@ -43,6 +43,110 @@
                         <h2 id="details-item-name"></h2>
                     </div>
 
+                    <!-- Equipment View Section -->
+                    <div class="equipment-section hidden">
+                        <h3>Equipment Stats & DPS</h3>
+                        
+                        <!-- Combat Stats Configuration -->
+                        <div class="combat-config hidden">
+                            <h4>Combat Configuration</h4>
+                            <div class="config-grid hidden">
+                                <div class="config-category">
+                                    <h5>Base Stats</h5>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="max-combat" class="config-checkbox">
+                                            <span class="checkmark"></span>
+                                            Max Combat (99 Attack, Strength, Defence, Magic, Ranged)
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="config-category">
+                                    <h5>Target Creature Type</h5>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="target-saradomin" class="config-checkbox">
+                                            <span class="checkmark"></span>
+                                            Against Saradomin creatures
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="target-bandos" class="config-checkbox">
+                                            <span class="checkmark"></span>
+                                            Against Bandos creatures
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="target-zamorak" class="config-checkbox">
+                                            <span class="checkmark"></span>
+                                            Against Zamorakian creatures
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="target-armadyl" class="config-checkbox">
+                                            <span class="checkmark"></span>
+                                            Against Armadyl creatures
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="target-dragon" class="config-checkbox">
+                                            <span class="checkmark"></span>
+                                            Against Dragon
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="target-spider" class="config-checkbox">
+                                            <span class="checkmark"></span>
+                                            Against Spider
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="equipment-stats hidden">
+                            <div class="stats-grid">
+                                <div class="stat-category">
+                                    <h4>Combat Stats</h4>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Attack:</span>
+                                        <span id="stat-attack" class="stat-value">0</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Strength:</span>
+                                        <span id="stat-strength" class="stat-value">0</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Defence:</span>
+                                        <span id="stat-defence" class="stat-value">0</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Magic:</span>
+                                        <span id="stat-magic" class="stat-value">0</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Ranged:</span>
+                                        <span id="stat-ranged" class="stat-value">0</span>
+                                    </div>
+                                </div>
+                                <div class="stat-category">
+                                    <h4>DPS Calculations</h4>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Accuracy:</span>
+                                        <span id="dps-accuracy" class="stat-value">0%</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Max Hit:</span>
+                                        <span id="dps-maxhit" class="stat-value">0</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">DPS:</span>
+                                        <span id="dps-value" class="stat-value">0.00</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Attack Speed:</span>
+                                        <span id="dps-speed" class="stat-value">2.4s</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="enchantment-section">
                         <h3>2. Apply Orbs</h3>
                         <div id="orbs-container" class="orbs-container">
@@ -68,6 +172,17 @@
         </main>
     </div>
 
-    <script src="script.js?v=1.2"></script>
+    <script src="script.js?v=1.3"></script>
+    <script>
+    // Add this helper to check if the selected item is a weapon
+    function isWeaponSelected() {
+        return state.selectedItem && state.selectedItem.equipment && state.selectedItem.equipment.slot === 'weapon';
+    }
+    // In renderDetailsPanel, show/hide DPS and combat config based on weapon
+    const dpsPanel = document.querySelector('.equipment-stats');
+    const combatConfigPanel = document.querySelector('.config-grid');
+    if (dpsPanel) dpsPanel.style.display = isWeaponSelected() ? '' : 'none';
+    if (combatConfigPanel) combatConfigPanel.style.display = isWeaponSelected() ? '' : 'none';
+    </script>
 </body>
 </html> 
