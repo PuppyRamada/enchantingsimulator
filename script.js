@@ -19,6 +19,12 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedSlot: 'head',
         currentPage: 0,
         searchTerm: '',
+        orbCounts: {
+            annul: 0,
+            annex: 0,
+            turmoil: 0,
+            falter: 0
+        }
     };
 
     // --- DOM Element Cache ---
@@ -38,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         orbsContainer: document.getElementById('orbs-container'),
         enchantmentsTitle: document.getElementById('enchantments-title'),
         enchantmentList: document.getElementById('enchantment-list'),
+        actionLog: document.getElementById('action-log'),
     };
 
     // Check if all required DOM elements are found
@@ -129,11 +136,20 @@ document.addEventListener('DOMContentLoaded', () => {
             state.activeEnchantments = [];
             state.detailsViewMode = 'current';
             
+            // Reset orb counters when changing items
+            state.orbCounts = {
+                annul: 0,
+                annex: 0,
+                turmoil: 0,
+                falter: 0
+            };
+            
             // Visually mark selected item
             document.querySelectorAll('.item.selected').forEach(el => el.classList.remove('selected'));
             itemElement.classList.add('selected');
 
             renderDetailsPanel();
+            renderOrbs(); // Re-render orbs to update counters
         }
     }
     
@@ -234,11 +250,21 @@ document.addEventListener('DOMContentLoaded', () => {
             { name: 'Faltering', id: 'falter' },
         ];
         orbs.forEach(orb => {
+            const orbContainer = document.createElement('div');
+            orbContainer.className = 'orb-container';
+            
             const button = document.createElement('button');
             button.textContent = orb.name;
             button.dataset.orbId = orb.id;
             button.className = 'orb-button';
-            dom.orbsContainer.appendChild(button);
+            
+            const counter = document.createElement('div');
+            counter.className = 'orb-counter';
+            counter.textContent = `Used: ${state.orbCounts[orb.id]}`;
+            
+            orbContainer.appendChild(button);
+            orbContainer.appendChild(counter);
+            dom.orbsContainer.appendChild(orbContainer);
         });
     }
 
@@ -297,9 +323,42 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- Action Logging ---
+    function addActionLogEntry(type, message, details = '') {
+        if (!dom.actionLog) return;
+        
+        const entry = document.createElement('div');
+        entry.className = `action-log-entry ${type}`;
+        
+        const timestamp = new Date().toLocaleTimeString();
+        const romanNumerals = ["", " I", " II", " III", " IV", " V"];
+        
+        entry.innerHTML = `
+            <div class="action-log-timestamp">${timestamp}</div>
+            <div class="action-log-message">${message}</div>
+            ${details ? `<div class="action-log-details">${details}</div>` : ''}
+        `;
+        
+        dom.actionLog.insertBefore(entry, dom.actionLog.firstChild);
+        
+        // Keep only the last 10 entries
+        const entries = dom.actionLog.querySelectorAll('.action-log-entry');
+        if (entries.length > 10) {
+            entries[entries.length - 1].remove();
+        }
+    }
+
+    function getEnchantmentDisplayName(enchantment) {
+        const romanNumerals = ["", " I", " II", " III", " IV", " V"];
+        return `${enchantment.baseName}${romanNumerals[enchantment.tier] || ''}`;
+    }
+
     // --- Logic ---
     function applyOrb(orbId) {
         if (!state.selectedItem) return;
+
+        // Increment orb counter
+        state.orbCounts[orbId]++;
 
         const itemSlotKey = Object.keys(SLOT_MAP).find(key => SLOT_MAP[key] === state.selectedItem.equipment.slot);
         if (!itemSlotKey) return;
@@ -311,10 +370,87 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         switch (orbId) {
-            case 'annul': // Remove a random enchantment
+            case 'annul': // Remove a random enchantment with tier prioritization
                 if (state.activeEnchantments.length > 0) {
-                    const randomIndex = Math.floor(Math.random() * state.activeEnchantments.length);
-                    state.activeEnchantments.splice(randomIndex, 1);
+                    // Group enchantments by their base name to check for higher tiers
+                    const enchantmentGroups = {};
+                    state.activeEnchantments.forEach(ench => {
+                        if (!enchantmentGroups[ench.baseName]) {
+                            enchantmentGroups[ench.baseName] = [];
+                        }
+                        enchantmentGroups[ench.baseName].push(ench);
+                    });
+
+                    // Find enchantments that have higher tiers available
+                    const enchantmentsWithHigherTiers = [];
+                    const enchantmentsWithoutHigherTiers = [];
+
+                    Object.entries(enchantmentGroups).forEach(([baseName, enchants]) => {
+                        const currentTier = Math.max(...enchants.map(e => e.tier));
+                        const availableHigherTiers = allEnchantments
+                            .filter(e => e.baseName === baseName && 
+                                       e.slots.includes(itemSlotKey) && 
+                                       e.tier > currentTier);
+                        
+                        if (availableHigherTiers.length > 0) {
+                            enchantmentsWithHigherTiers.push(...enchants);
+                        } else {
+                            enchantmentsWithoutHigherTiers.push(...enchants);
+                        }
+                    });
+
+                    let targetEnchantments = [];
+                    let logDetails = '';
+                    
+                    // If there are enchantments with higher tiers available, prioritize them
+                    if (enchantmentsWithHigherTiers.length > 0) {
+                        targetEnchantments = enchantmentsWithHigherTiers;
+                        logDetails = `Prioritized enchantments with higher tiers available (${enchantmentsWithHigherTiers.length} enchantments)`;
+                    } else if (enchantmentsWithoutHigherTiers.length > 0) {
+                        // If no higher tiers exist, prioritize lower tiers with 70% chance
+                        const randomRoll = Math.random();
+                        if (randomRoll < 0.7) {
+                            // Sort by tier (ascending) to prioritize lower tiers
+                            enchantmentsWithoutHigherTiers.sort((a, b) => a.tier - b.tier);
+                            targetEnchantments = enchantmentsWithoutHigherTiers;
+                            logDetails = `No higher tiers available - prioritized lower tiers (70% chance) - Rolled: ${(randomRoll * 100).toFixed(1)}%`;
+                        } else {
+                            // 30% chance to select randomly from all enchantments
+                            targetEnchantments = state.activeEnchantments;
+                            logDetails = `⚠️ UNLUCKY! No higher tiers available - random selection (30% chance) - Rolled: ${(randomRoll * 100).toFixed(1)}%`;
+                        }
+                    } else {
+                        // Fallback to all enchantments if something goes wrong
+                        targetEnchantments = state.activeEnchantments;
+                        logDetails = `Fallback to random selection`;
+                    }
+
+                    // Remove a random enchantment from the target group
+                    if (targetEnchantments.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * targetEnchantments.length);
+                        const enchantmentToRemove = targetEnchantments[randomIndex];
+                        const removeIndex = state.activeEnchantments.findIndex(e => 
+                            e.name === enchantmentToRemove.name && e.tier === enchantmentToRemove.tier
+                        );
+                        if (removeIndex !== -1) {
+                            const removedEnchantment = state.activeEnchantments[removeIndex];
+                            state.activeEnchantments.splice(removeIndex, 1);
+                            
+                            // Check if this was an unlucky removal (higher tier when lower tiers exist)
+                            const wasUnlucky = enchantmentsWithoutHigherTiers.length > 0 && 
+                                              enchantmentsWithoutHigherTiers.some(e => e.tier < removedEnchantment.tier) &&
+                                              targetEnchantments === state.activeEnchantments;
+                            
+                            const logType = wasUnlucky ? 'removed-unlucky' : 'removed';
+                            const logMessage = wasUnlucky ? 
+                                `⚠️ UNLUCKY! Removed ${getEnchantmentDisplayName(removedEnchantment)} (higher tier)` :
+                                `Removed ${getEnchantmentDisplayName(removedEnchantment)}`;
+                            
+                            addActionLogEntry(logType, logMessage, logDetails);
+                        }
+                    }
+                } else {
+                    addActionLogEntry('removed', 'No enchantments to remove', 'Item has no active enchantments');
                 }
                 break;
 
@@ -328,39 +464,101 @@ document.addEventListener('DOMContentLoaded', () => {
                     )];
 
                     if (possibleBaseNames.length > 0) {
-                        const randomBaseName = possibleBaseNames[Math.floor(Math.random() * possibleBaseNames.length)];
-                        const newEnchantment = getRandomTier(randomBaseName);
+                        const randomBaseNameIndex = Math.floor(Math.random() * possibleBaseNames.length);
+                        const randomBaseName = possibleBaseNames[randomBaseNameIndex];
+                        const baseNameChance = ((1 / possibleBaseNames.length) * 100).toFixed(1);
+                        
+                        const family = allEnchantments.filter(e => e.baseName === randomBaseName && e.slots.includes(itemSlotKey));
+                        const randomTierIndex = Math.floor(Math.random() * family.length);
+                        const newEnchantment = family[randomTierIndex];
+                        const tierChance = ((1 / family.length) * 100).toFixed(1);
+                        
                         if (newEnchantment) {
                             state.activeEnchantments.push(newEnchantment);
+                            addActionLogEntry('added', 
+                                `Added ${getEnchantmentDisplayName(newEnchantment)}`, 
+                                `Family selection: ${baseNameChance}% (${randomBaseNameIndex + 1}/${possibleBaseNames.length}) | Tier selection: ${tierChance}% (${randomTierIndex + 1}/${family.length})`
+                            );
                         }
+                    } else {
+                        addActionLogEntry('added', 'No new enchantments available', 'All enchantment families are already applied');
                     }
+                } else {
+                    addActionLogEntry('added', 'Cannot add more enchantments', 'Item already has maximum of 3 enchantments');
                 }
                 break;
 
             case 'turmoil': // Reroll all enchantments with new unique families
+                const oldEnchantments = [...state.activeEnchantments];
                 state.activeEnchantments = [];
                 const availableBaseNames = [...new Set(allEnchantments
                     .filter(e => e.slots.includes(itemSlotKey))
                     .map(e => e.baseName)
                 )];
                 
+                const newEnchantments = [];
+                const selectionDetails = [];
                 for (let i = 0; i < 3 && availableBaseNames.length > 0; i++) {
                     const nameIndex = Math.floor(Math.random() * availableBaseNames.length);
                     const baseName = availableBaseNames.splice(nameIndex, 1)[0];
-                    const newEnchantment = getRandomTier(baseName);
+                    const baseNameChance = ((1 / (availableBaseNames.length + 1)) * 100).toFixed(1);
+                    
+                    const family = allEnchantments.filter(e => e.baseName === baseName && e.slots.includes(itemSlotKey));
+                    const randomTierIndex = Math.floor(Math.random() * family.length);
+                    const newEnchantment = family[randomTierIndex];
+                    const tierChance = ((1 / family.length) * 100).toFixed(1);
+                    
                     if (newEnchantment) {
                         state.activeEnchantments.push(newEnchantment);
+                        newEnchantments.push(newEnchantment);
+                        selectionDetails.push(`${baseName}: ${baseNameChance}% family, ${tierChance}% tier`);
                     }
                 }
+                
+                const oldNames = oldEnchantments.map(e => getEnchantmentDisplayName(e)).join(', ');
+                const newNames = newEnchantments.map(e => getEnchantmentDisplayName(e)).join(', ');
+                
+                addActionLogEntry('changed', 
+                    `Rerolled all enchantments`, 
+                    `Removed: ${oldNames || 'None'} → Added: ${newNames || 'None'} | Selection chances: ${selectionDetails.join(' | ')}`
+                );
                 break;
 
             case 'falter': // Reroll tiers of existing enchantments
+                const tierChanges = [];
+                const tierSelectionDetails = [];
                 state.activeEnchantments = state.activeEnchantments.map(activeEnch => {
-                    return getRandomTier(activeEnch.baseName) || activeEnch;
+                    const oldTier = activeEnch.tier;
+                    const family = allEnchantments.filter(e => e.baseName === activeEnch.baseName && e.slots.includes(itemSlotKey));
+                    const randomTierIndex = Math.floor(Math.random() * family.length);
+                    const newEnchantment = family[randomTierIndex];
+                    const newTier = newEnchantment.tier;
+                    const tierChance = ((1 / family.length) * 100).toFixed(1);
+                    
+                    tierSelectionDetails.push(`${activeEnch.baseName}: ${tierChance}% (${randomTierIndex + 1}/${family.length})`);
+                    
+                    if (oldTier !== newTier) {
+                        tierChanges.push(`${activeEnch.baseName}: ${oldTier} → ${newTier}`);
+                    }
+                    
+                    return newEnchantment;
                 });
+                
+                if (tierChanges.length > 0) {
+                    addActionLogEntry('changed', 
+                        `Rerolled enchantment tiers`, 
+                        `Changes: ${tierChanges.join(', ')} | Selection chances: ${tierSelectionDetails.join(' | ')}`
+                    );
+                } else {
+                    addActionLogEntry('changed', 
+                        `Rerolled enchantment tiers`, 
+                        `No tier changes occurred | Selection chances: ${tierSelectionDetails.join(' | ')}`
+                    );
+                }
                 break;
         }
         renderDetailsPanel();
+        renderOrbs(); // Update orb counters display
     }
 
     // --- Startup ---
